@@ -7,19 +7,20 @@
 
 }
 body{
-    background: linear-gradient(135deg, #cce2f0, #e6f3f9);
-     
-     min-height: 100vh;
+    background: url('https://wallpapercat.com/w/middle-retina/4/6/2/87727-3840x2160-desktop-4k-minecraft-wallpaper-image.jpg') no-repeat center center fixed;
+    background-size: cover;
+    min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-
 }
 
 .container{
     width: 90%;
     padding: 2rem 2.5rem;
-    background-color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(1px);
+    -webkit-backdrop-filter: blur(10px); 
     border-radius: 20px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
     max-width: 500px;
@@ -68,7 +69,7 @@ form button:hover{
     
 }
 #todo-list li{
-    background-color:  rgb(172, 172, 172);
+    background-color:  rgb(119, 119, 119);
     color: #faf9fa;
     padding: 0.75rem 1rem;
     margin-bottom: 0.6rem;
