@@ -11,7 +11,7 @@ form.addEventListener('submit', function(e) {
     if(taskText ==='') return;
 
     addTodo(taskText);
-    saveTodo(taskText);
+    updateLocalStorage();
     input.value = '';
 });
 
@@ -28,12 +28,15 @@ function addTodo(text, isDone =false){
         </div>
     `;
     list.appendChild(li);
+    reorderTasks();
+    updateLocalStorage
 }
 
 function toggleDone(button) {
     const li = button.closest('li');
     li.classList.toggle('done');
     updateLocalStorage();
+    reorderTasks();
 }
 
 function deleteTodo(button) {
@@ -42,11 +45,7 @@ function deleteTodo(button) {
     updateLocalStorage();
 }
 
-function saveTodo(text) {
-    const todos = geTodosFromLocalStorage();
-    todos.push({ text, isDone: false });
-    localStorage.setItem('todos', JSON.stringify(todos));
-}
+
 
 function loadTodos() {
     const todos = geTodosFromLocalStorage();
@@ -70,4 +69,13 @@ function updateLocalStorage() {
     });
 
     localStorage.setItem('todos', JSON.stringify(todos));
+}
+
+function reorderTasks() {
+    const items =  Array.from(document.querySelectorAll('#todo-list li'));
+    const undoneItems = items.filter(li => !li.classList.contains('done'));
+    const completed = items.filter(li => li.classList.contains('done'));
+
+    list.innerHTML = '';
+    [...undoneItems, ...completed].forEach(li => list.appendChild(li));
 }
