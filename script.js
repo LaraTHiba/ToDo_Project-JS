@@ -2,7 +2,6 @@ const form = document.getElementById('todo-form');
 const input = document.getElementById('todo-input');
 const list = document.getElementById('todo-list');
 
-window.addEventListener('DOMContentLoaded', loadTodos);
 
 form.addEventListener('submit', function(e) {
     e.preventDefault();
@@ -11,12 +10,11 @@ form.addEventListener('submit', function(e) {
     if(taskText ==='') return;
 
     addTodo(taskText);
-    updateLocalStorage();
     input.value = '';
 });
 
 
-function addTodo(text, isDone =false){
+function addTodo(text, isDone = false, skipDB = false){
     const li= document.createElement('li');
     if(isDone) li.classList.add('done');
 
@@ -29,47 +27,94 @@ function addTodo(text, isDone =false){
     `;
     list.appendChild(li);
     reorderTasks();
-    updateLocalStorage
+    if(!skipDB) addTaskDB(text, isDone);    
+
+    task.forEach(task => {
+        addTodo(task.title, task.completed, true);
+    });
+    reorderTasks();
+}
+
+function addTaskDB(text, isDone) {
+    const transaction = db.transaction(['tasks'], 'readwrite');
+    const store = transaction.objectStore('tasks');
+    const task = {
+        title: text,
+        completed: isDone,
+        createdAt: new Date()
+    };
+    store.add(task);
 }
 
 function toggleDone(button) {
     const li = button.closest('li');
+    const text = li.querySelector('span').textContent;
+    const isNowDone = !li.classList.contains('done');
     li.classList.toggle('done');
-    updateLocalStorage();
     reorderTasks();
+
+    updateTaskInDB(text, isNowDone);
+}
+
+function updateTaskInDB(text, isDone) {
+    const transaction = db.transaction(['tasks'], 'readwrite');
+    const store = transaction.objectStore('tasks');
+
+    const request = store.getAll();
+    request.onsuccess = function() {
+        const allTasks = request.result;
+        const task = allTasks.find(t => t.title === text);
+
+        if (task) {
+            task.completed = isDone;
+            store.put(task);
+        }
+    };
 }
 
 function deleteTodo(button) {
     const li =button.closest('li');
+    const text = li.querySelector('span').textContent;
     li.remove();
-    updateLocalStorage();
+
+    deleteTaskFromDB(text);
 }
 
+function deleteTaskFromDB(text) {
+    const transaction = db.transaction(['tasks'], 'readwrite');
+    const store = transaction.objectStore('tasks');
+
+    const request = store.getAll();
+    request.onsuccess = function() {
+        const allTasks = request.result;
+        const task = allTasks.find(t => t.title === text);
+
+        if (task) {
+            store.delete(task.id);
+        }
+    };
+}
 
 
 function loadTodos() {
-    const todos = geTodosFromLocalStorage();
-    todos.forEach(todo => {
-        addTodo(todo.text, todo.isDone);
-    });
+
+    const transaction = db.transaction(['tasks'], 'readonly');
+    const store = transaction.objectStore('tasks');
+
+    const request = store.getAll();
+    request.onsuccess = function() {
+        const tasks = request.result;
+        tasks.forEach(task => {
+            addTodo(task.title, task.completed, true);
+        });
+    };
+
+    request.onsuccess = function(event) {
+        db = event.target.result;
+        loadTodos(); 
+};
 }
 
-function geTodosFromLocalStorage() {
-    return JSON.parse(localStorage.getItem('todos')) || [];
-}
-
-function updateLocalStorage() {
-    const items = document.querySelectorAll('#todo-list li');
-    const todos = [];
-
-    items.forEach(li =>{
-        const text = li.querySelector('span').textContent;
-        const done = li.classList.contains('done');
-        todos.push({ text, done });
-    });
-
-    localStorage.setItem('todos', JSON.stringify(todos));
-}
 
 function reorderTasks() {
     const items =  Array.from(document.querySelectorAll('#todo-list li'));
@@ -79,3 +124,4 @@ function reorderTasks() {
     list.innerHTML = '';
     [...undoneItems, ...completed].forEach(li => list.appendChild(li));
 }
+
