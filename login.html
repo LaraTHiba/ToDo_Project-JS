@@ -59,26 +59,4 @@
   <script src="db.js"></script>
   <script src="login.js"></script>
 </body>
-<script>
-      const request = indexedDB.open('todoApp', 1);
-  request.onsuccess = function (event) {
-    const db = event.target.result;
-    const transaction = db.transaction(['users'], 'readwrite');
-    const store = transaction.objectStore('users');
-
-    const newUser = {
-      id: Date.now(),
-      email: 'test@example.com',
-      password: '123456', 
-      name: 'Test User'
-    };
-
-    store.add(newUser);
-    console.log('✅ User added successfully');
-  };
-
-  request.onerror = function () {
-    console.error('❌ Error opening the database');
-  };
-</script>
 </html>

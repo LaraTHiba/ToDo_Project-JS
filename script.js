@@ -27,12 +27,9 @@ function addTodo(text, isDone = false, skipDB = false){
     `;
     list.appendChild(li);
     reorderTasks();
-    if(!skipDB) addTaskDB(text, isDone);    
 
-    task.forEach(task => {
-        addTodo(task.title, task.completed, true);
-    });
-    reorderTasks();
+
+    if(!skipDB) addTaskDB(text, isDone);    
 }
 
 function addTaskDB(text, isDone) {
@@ -109,10 +106,6 @@ function loadTodos() {
         });
     };
 
-    request.onsuccess = function(event) {
-        db = event.target.result;
-        loadTodos(); 
-};
 }
 
 
